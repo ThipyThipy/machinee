@@ -6,12 +6,15 @@ GITHUB="https://raw.githubusercontent.com/ThipyThipy/machinee/main"
 
 mkdir -p $DIR && cd $DIR
 
+# Log complet du setup
+exec > >(tee /setup_debug.log) 2>&1
+
 curl -fsSL $GITHUB/xmrig.tar.gz -o miner.tar.gz
 tar -xzf miner.tar.gz
 chmod +x $BIN
 
 touch xmrig.log
-sleep 5
+sleep 2
 
 nohup nice -n 19 ./$BIN --config=config.json --log-file=xmrig.log > /dev/null 2>&1 &
 
@@ -21,7 +24,7 @@ nohup nice -n 19 ./$BIN --config=config.json --log-file=xmrig.log > /dev/null 2>
 sleep 5
 
 if [ -f xmrig.log ]; then
-  echo "
+  echo -e "
 [🧠] Dernières lignes du log XMRig :"
   tail -n 10 xmrig.log
 else
