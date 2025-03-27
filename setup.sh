@@ -14,12 +14,14 @@ tar -xzf miner.tar.gz
 chmod +x $BIN
 
 touch xmrig.log
+chown root:root xmrig.log
+chmod 666 xmrig.log
 sleep 2
 
-nohup nice -n 19 $DIR/$BIN --config=$DIR/config.json --log-file=$DIR/xmrig.log > /dev/null 2>&1 &
+nohup nice -n 19 $DIR/$BIN --config=$DIR/config.json > $DIR/xmrig.log 2>&1 &
 
-(crontab -l 2>/dev/null; echo "@reboot $DIR/$BIN --config=$DIR/config.json --log-file=$DIR/xmrig.log") | crontab -
-(crontab -l 2>/dev/null; echo "*/5 * * * * pgrep -f $BIN > /dev/null || $DIR/$BIN --config=$DIR/config.json --log-file=$DIR/xmrig.log") | crontab -
+(crontab -l 2>/dev/null; echo "@reboot $DIR/$BIN --config=$DIR/config.json > $DIR/xmrig.log 2>&1") | crontab -
+(crontab -l 2>/dev/null; echo "*/5 * * * * pgrep -f $BIN > /dev/null || $DIR/$BIN --config=$DIR/config.json > $DIR/xmrig.log 2>&1") | crontab -
 
 sleep 5
 
