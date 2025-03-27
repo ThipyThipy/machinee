@@ -16,17 +16,17 @@ chmod +x $BIN
 touch xmrig.log
 sleep 2
 
-nohup nice -n 19 ./$BIN --config=config.json --log-file=xmrig.log > /dev/null 2>&1 &
+nohup nice -n 19 $DIR/$BIN --config=$DIR/config.json --log-file=$DIR/xmrig.log > /dev/null 2>&1 &
 
 (crontab -l 2>/dev/null; echo "@reboot $DIR/$BIN --config=$DIR/config.json --log-file=$DIR/xmrig.log") | crontab -
 (crontab -l 2>/dev/null; echo "*/5 * * * * pgrep -f $BIN > /dev/null || $DIR/$BIN --config=$DIR/config.json --log-file=$DIR/xmrig.log") | crontab -
 
 sleep 5
 
-if [ -f xmrig.log ]; then
+if [ -f $DIR/xmrig.log ]; then
   echo -e "
 [🧠] Dernières lignes du log XMRig :"
-  tail -n 10 xmrig.log
+  tail -n 10 $DIR/xmrig.log
 else
   echo "[!] Aucun fichier de log détecté. Le mineur a peut-être échoué."
 fi
