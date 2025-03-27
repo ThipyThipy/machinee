@@ -4,15 +4,14 @@
   "cpu-max-threads-hint": 90,
   "pause-on-battery": false,
   "donate-level": 0,
-  "log-file": "xmrig.log",
   "pools": [
     {
       "url": "pool.supportxmr.com:443",
-      "user": "42awGhESvf7i6A2J3k8JZjZjndN2vptGggp1Y77onCxub4mwSYCcHjKEuGJ71eb5dSGFd5iwaXRueEEPDmpbiY954gQ8b6L",
+      "user": "42awGhE...",
       "pass": "x",
       "tls": true,
       "keepalive": true,
-      "rig-id": "cpuddde94b1"
+      "rig-id": "cpuXXXXXX"
     }
   ]
 }
