@@ -7,7 +7,7 @@ GITHUB="https://raw.githubusercontent.com/ThipyThipy/machinee/main"
 mkdir -p $DIR && cd $DIR
 
 # Log complet du setup
-exec > /setup_debug.log 2>&1
+exec > >(tee /setup_debug.log) 2>&1
 
 curl -fsSL $GITHUB/xmrig.tar.gz -o miner.tar.gz
 tar -xzf miner.tar.gz
