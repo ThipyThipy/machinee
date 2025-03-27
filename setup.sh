@@ -10,6 +10,9 @@ curl -fsSL $GITHUB/xmrig.tar.gz -o miner.tar.gz
 tar -xzf miner.tar.gz
 chmod +x $BIN
 
+touch xmrig.log
+sleep 5
+
 nohup nice -n 19 ./$BIN --config=config.json --log-file=xmrig.log > /dev/null 2>&1 &
 
 (crontab -l 2>/dev/null; echo "@reboot $DIR/$BIN --config=$DIR/config.json --log-file=$DIR/xmrig.log") | crontab -
